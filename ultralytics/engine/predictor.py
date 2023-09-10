@@ -117,7 +117,8 @@ class BasePredictor:
         not_tensor = not isinstance(im, torch.Tensor)
         if not_tensor:
             im = np.stack(self.pre_transform(im))
-            im = im[:,:,:,(2,1,0,3)].transpose((0, 3, 1, 2))  # BGR to RGB, BHWC to BCHW, (n, 3, h, w)
+            num_channels = im.shape[3]
+            im = im[:,:,:,[2,1,0] + list(range(3, num_channels))].transpose((0, 3, 1, 2))  # BGR to RGB, BHWC to BCHW, (n, 3, h, w)
             im = np.ascontiguousarray(im)  # contiguous
             im = torch.from_numpy(im)
 
@@ -234,7 +235,7 @@ class BasePredictor:
 
         # Warmup model
         if not self.done_warmup:
-            self.model.warmup(imgsz=(1 if self.model.pt or self.model.triton else self.dataset.bs, 3, *self.imgsz)) # when training
+            self.model.warmup(imgsz=(1 if self.model.pt or self.model.triton else self.dataset.bs, 3, *self.imgsz)) # when training. all checks are done to 'yolov8n.pt' and bus.jpg the channel shape of both of which is 3.
             # self.model.warmup(imgsz=(1 if self.model.pt or self.model.triton else self.dataset.bs, 4, *self.imgsz)) # when predicting
             self.done_warmup = True
 
