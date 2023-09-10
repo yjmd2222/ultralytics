@@ -297,7 +297,8 @@ class LoadPilAndNumpy:
         if isinstance(im, Image.Image):
             if im.mode != 'RGB':
                 im = im.convert('RGB')
-            im = np.asarray(im)[:, :, ::-1]
+            num_channels = im.shape[2]
+            im = np.asarray(im)[:, :, [2,1,0] + list(range(3,num_channels))]
             im = np.ascontiguousarray(im)  # contiguous
         return im
 
